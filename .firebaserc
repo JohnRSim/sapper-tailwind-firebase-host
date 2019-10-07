@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "sapper-tailwind-firebase"
+    "default": "sapper-tailwind-firebase",
+    "prod": "tipit-jse"
   }
 }

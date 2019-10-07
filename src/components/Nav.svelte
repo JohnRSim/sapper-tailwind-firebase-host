@@ -5,7 +5,11 @@
 <style>
 
 	a {
-		@apply flex h-full justify-center mx-2 items-center;
+		@apply flex no-underline h-full justify-center mx-2 items-center;
+	}
+
+	.selected { 
+		@apply text-white; 
 	}
 
 	svg {
@@ -18,7 +22,7 @@
 
 	@screen md {
 		.selected {
-			@apply text-secondary border-solid border-b-2 border-purple-700;
+			@apply text-purple-700 border-solid border-b-2 border-purple-700;
 			padding-top: 2px;
 		}
 
@@ -38,10 +42,10 @@
 
 </style>
 
-<nav class="bg-primary md:bg-secondary font-light text-default md:text-default h-16 w-full fixed md:mt-16 bottom-0 md:bottom-auto">
+<nav class="bg-purple-700 md:bg-gray-300 font-light text-purple-400 md:text-gray-800 h-16 w-full fixed md:mt-16 bottom-0 md:bottom-auto">
 	<ul class="flex flex-row items-center justify-around md:justify-start md:mx-8 h-full">
 		<li>
-			<a class='{segment === undefined ? "text-primary" : ""}' href='.'>
+			<a class='{segment === undefined ? "selected" : ""}' href='.'>
 				<svg>
 					<use xlink:href="solid.svg#home"></use>
 				</svg>
@@ -49,7 +53,7 @@
 			</a>
 		</li>
 		<li>
-			<a rel=prefetch class='{segment === "blog" ? "text-primary" : ""}' href='blog'>
+			<a rel=prefetch class='{segment === "blog" ? "selected" : ""}' href='blog'>
 				<svg>
 					<use xlink:href="solid.svg#calendar-check"></use>
 				</svg>
@@ -57,7 +61,7 @@
 			</a>
 		</li>
 		<li>
-			<a class='{segment === "settings" ? "text-primary" : ""}' href='settings'>
+			<a class='{segment === "settings" ? "selected" : ""}' href='settings'>
 				<svg>
 					<use xlink:href="solid.svg#cog"></use>
 				</svg>

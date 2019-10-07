@@ -11,7 +11,11 @@ if (dev) {
 		.use(
 			compression({ threshold: 0 }),
 			sirv('static', { dev }),
-			sapper.middleware()
+			sapper.middleware({
+				session: (req, res) => ({
+					user: null
+				})
+			})
 		)
 		.listen(PORT, err => {
 			if (err) console.log('error', err);

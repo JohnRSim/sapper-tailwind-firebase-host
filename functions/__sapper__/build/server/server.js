@@ -9,6 +9,14 @@ var polka = _interopDefault(require('polka'));
 var compression = _interopDefault(require('compression'));
 var fs = _interopDefault(require('fs'));
 var path = _interopDefault(require('path'));
+require('./chunk-75814ef3.js');
+var __chunk_2 = require('./chunk-af024634.js');
+var __chunk_3 = require('./chunk-6c149803.js');
+var index = require('./index-8eef069d.js');
+var index$1 = require('./index-29ecb1c9.js');
+var settings = require('./settings-4fb50a36.js');
+var index$2 = require('./index-60d736dc.js');
+var _slug_ = require('./[slug]-4a41bcc8.js');
 var Stream = _interopDefault(require('stream'));
 var http = _interopDefault(require('http'));
 var Url = _interopDefault(require('url'));
@@ -156,393 +164,6 @@ var route_1 = /*#__PURE__*/Object.freeze({
 	get: get$1
 });
 
-function noop() { }
-function run(fn) {
-    return fn();
-}
-function blank_object() {
-    return Object.create(null);
-}
-function run_all(fns) {
-    fns.forEach(run);
-}
-function safe_not_equal(a, b) {
-    return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
-}
-
-let current_component;
-function set_current_component(component) {
-    current_component = component;
-}
-function get_current_component() {
-    if (!current_component)
-        throw new Error(`Function called outside component initialization`);
-    return current_component;
-}
-function setContext(key, context) {
-    get_current_component().$$.context.set(key, context);
-}
-const escaped = {
-    '"': '&quot;',
-    "'": '&#39;',
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;'
-};
-function escape(html) {
-    return String(html).replace(/["'&<>]/g, match => escaped[match]);
-}
-function each(items, fn) {
-    let str = '';
-    for (let i = 0; i < items.length; i += 1) {
-        str += fn(items[i], i);
-    }
-    return str;
-}
-const missing_component = {
-    $$render: () => ''
-};
-function validate_component(component, name) {
-    if (!component || !component.$$render) {
-        if (name === 'svelte:component')
-            name += ' this={...}';
-        throw new Error(`<${name}> is not a valid SSR component. You may need to review your build config to ensure that dependencies are compiled, rather than imported as pre-compiled modules`);
-    }
-    return component;
-}
-let on_destroy;
-function create_ssr_component(fn) {
-    function $$render(result, props, bindings, slots) {
-        const parent_component = current_component;
-        const $$ = {
-            on_destroy,
-            context: new Map(parent_component ? parent_component.$$.context : []),
-            // these will be immediately discarded
-            on_mount: [],
-            before_update: [],
-            after_update: [],
-            callbacks: blank_object()
-        };
-        set_current_component({ $$ });
-        const html = fn(result, props, bindings, slots);
-        set_current_component(parent_component);
-        return html;
-    }
-    return {
-        render: (props = {}, options = {}) => {
-            on_destroy = [];
-            const result = { head: '', css: new Set() };
-            const html = $$render(result, props, {}, options);
-            run_all(on_destroy);
-            return {
-                html,
-                css: {
-                    code: Array.from(result.css).map(css => css.code).join('\n'),
-                    map: null // TODO
-                },
-                head: result.head
-            };
-        },
-        $$render
-    };
-}
-/**
- * Get the current value from a store by subscribing and immediately unsubscribing.
- * @param store readable
- */
-function get_store_value(store) {
-    let value;
-    const unsubscribe = store.subscribe(_ => value = _);
-    if (unsubscribe.unsubscribe)
-        unsubscribe.unsubscribe();
-    else
-        unsubscribe();
-    return value;
-}
-
-const subscriber_queue = [];
-/**
- * Create a `Writable` store that allows both updating and reading by subscription.
- * @param {*=}value initial value
- * @param {StartStopNotifier=}start start and stop notifications for subscriptions
- */
-function writable(value, start = noop) {
-    let stop;
-    const subscribers = [];
-    function set(new_value) {
-        if (safe_not_equal(value, new_value)) {
-            value = new_value;
-            if (stop) { // store is ready
-                const run_queue = !subscriber_queue.length;
-                for (let i = 0; i < subscribers.length; i += 1) {
-                    const s = subscribers[i];
-                    s[1]();
-                    subscriber_queue.push(s, value);
-                }
-                if (run_queue) {
-                    for (let i = 0; i < subscriber_queue.length; i += 2) {
-                        subscriber_queue[i][0](subscriber_queue[i + 1]);
-                    }
-                    subscriber_queue.length = 0;
-                }
-            }
-        }
-    }
-    function update(fn) {
-        set(fn(value));
-    }
-    function subscribe(run, invalidate = noop) {
-        const subscriber = [run, invalidate];
-        subscribers.push(subscriber);
-        if (subscribers.length === 1) {
-            stop = start(set) || noop;
-        }
-        run(value);
-        return () => {
-            const index = subscribers.indexOf(subscriber);
-            if (index !== -1) {
-                subscribers.splice(index, 1);
-            }
-            if (subscribers.length === 0) {
-                stop();
-                stop = null;
-            }
-        };
-    }
-    return { set, update, subscribe };
-}
-
-const darkTheme = writable(false);
-
-/* src/components/Theme.svelte generated by Svelte v3.6.9 */
-
-const Theme = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $darkTheme = get_store_value(darkTheme);
-
-	let { classes } = $$props;
-
-	if ($$props.classes === void 0 && $$bindings.classes && classes !== void 0) $$bindings.classes(classes);
-
-	return `${ $darkTheme ? `<button class="btn btn-primary ${escape(classes)}">
-			Toggle Dark Theme
-		</button>` : `<button class="btn btn-primary ${escape(classes)}">
-			Toggle Light Theme
-		</button>` }`;
-});
-
-/* src/routes/index.svelte generated by Svelte v3.6.9 */
-
-const css = {
-	code: "h1.svelte-11hl3yj,object.svelte-11hl3yj,p.svelte-11hl3yj{text-align:center;margin:0 auto}h1.svelte-11hl3yj{font-size:2.8em;font-weight:700;margin:0 0 0.5em 0;line-height:1;color:var(--color-text-default)}object.svelte-11hl3yj{width:100%;max-width:700px;margin:0 auto 1em auto}@media(min-width: 480px){h1.svelte-11hl3yj{font-size:4em}}",
-	map: "{\"version\":3,\"file\":\"index.svelte\",\"sources\":[\"index.svelte\"],\"sourcesContent\":[\"<script>\\n\\timport Theme from '../components/Theme.svelte';\\n\\tlet data = \\\"undraw_to_the_moon_v1mv.svg\\\"\\n</script>\\n\\n<style>h1, object, p {\\n  text-align: center;\\n  margin: 0 auto;\\n}\\n\\nh1 {\\n  font-size: 2.8em;\\n  font-weight: 700;\\n  margin: 0 0 0.5em 0;\\n  line-height: 1;\\n  color: var(--color-text-default);\\n}\\n\\nobject {\\n  width: 100%;\\n  max-width: 700px;\\n  margin: 0 auto 1em auto;\\n}\\n\\n@media (min-width: 480px) {\\n  h1 {\\n    font-size: 4em;\\n  }\\n}\\n\\n\\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9yb3V0ZXMvaW5kZXguc3ZlbHRlIiwiPG5vIHNvdXJjZT4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQ0M7RUFDQyxrQkFBa0I7RUFDbEIsY0FBYztBQUNmOztBQUVBO0VBQ0MsZ0JBQWdCO0VBQ2hCLGdCQUFnQjtFQUNoQixtQkFBbUI7RUFDbkIsY0FBYztFQ1ZoQixpQ0FBQTtBRFlDOztBQUVBO0VBQ0MsV0FBVztFQUNYLGdCQUFnQjtFQUNoQix1QkFBdUI7QUFDeEI7O0FBRUE7RUFDQztJQUNDLGNBQWM7RUFDZjtBQUNEIiwiZmlsZSI6InNyYy9yb3V0ZXMvaW5kZXguc3ZlbHRlIiwic291cmNlc0NvbnRlbnQiOlsiXG5cdGgxLCBvYmplY3QsIHAge1xuXHRcdHRleHQtYWxpZ246IGNlbnRlcjtcblx0XHRtYXJnaW46IDAgYXV0bztcblx0fVxuXG5cdGgxIHtcblx0XHRmb250LXNpemU6IDIuOGVtO1xuXHRcdGZvbnQtd2VpZ2h0OiA3MDA7XG5cdFx0bWFyZ2luOiAwIDAgMC41ZW0gMDtcblx0XHRsaW5lLWhlaWdodDogMTtcblx0XHRAYXBwbHkgdGV4dC1kZWZhdWx0O1xuXHR9XG5cblx0b2JqZWN0IHtcblx0XHR3aWR0aDogMTAwJTtcblx0XHRtYXgtd2lkdGg6IDcwMHB4O1xuXHRcdG1hcmdpbjogMCBhdXRvIDFlbSBhdXRvO1xuXHR9XG5cblx0QG1lZGlhIChtaW4td2lkdGg6IDQ4MHB4KSB7XG5cdFx0aDEge1xuXHRcdFx0Zm9udC1zaXplOiA0ZW07XG5cdFx0fVxuXHR9XG5cbiIsbnVsbF19 */</style>\\n\\n<svelte:head>\\n\\t<title>Sapper Template</title>\\n</svelte:head>\\n\\n<h1>Great success!</h1>\\n\\n<object class=\\\"w-full\\\" type=\\\"image/svg+xml\\\" data={data} title=\\\"illustration\\\">Illustration</object>\\n\\n<p>Illustration by <a class=\\\"link-primary\\\" href=\\\"https://undraw.co\\\" target=\\\"_blank\\\">unDraw</a></p>\\n\\n<Theme classes={\\\"mt-12 md:mt-4 mx-auto flex\\\"}/>\\n\"],\"names\":[],\"mappings\":\"AAKO,iBAAE,CAAE,qBAAM,CAAE,CAAC,eAAC,CAAC,AACpB,UAAU,CAAE,MAAM,CAClB,MAAM,CAAE,CAAC,CAAC,IAAI,AAChB,CAAC,AAED,EAAE,eAAC,CAAC,AACF,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,GAAG,CAChB,MAAM,CAAE,CAAC,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,CACnB,WAAW,CAAE,CAAC,CACd,KAAK,CAAE,IAAI,oBAAoB,CAAC,AAClC,CAAC,AAED,MAAM,eAAC,CAAC,AACN,KAAK,CAAE,IAAI,CACX,SAAS,CAAE,KAAK,CAChB,MAAM,CAAE,CAAC,CAAC,IAAI,CAAC,GAAG,CAAC,IAAI,AACzB,CAAC,AAED,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AACzB,EAAE,eAAC,CAAC,AACF,SAAS,CAAE,GAAG,AAChB,CAAC,AACH,CAAC\"}"
-};
-
-let data = "undraw_to_the_moon_v1mv.svg";
-
-const Index = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	$$result.css.add(css);
-
-	return `${($$result.head += `<title>Sapper Template</title>`, "")}
-
-	<h1 class="svelte-11hl3yj">Great success!</h1>
-
-	<object class="w-full svelte-11hl3yj" type="image/svg+xml"${(v => v == null ? "" : ` data="${escape(data)}"`)(data)} title="illustration">Illustration</object>
-
-	<p class="svelte-11hl3yj">Illustration by <a class="link-primary" href="https://undraw.co" target="_blank">unDraw</a></p>
-
-	${validate_component(Theme, 'Theme').$$render($$result, { classes: "mt-12 md:mt-4 mx-auto flex" }, {}, {})}`;
-});
-
-/* src/routes/settings.svelte generated by Svelte v3.6.9 */
-
-const css$1 = {
-	code: "h1.svelte-1rnbhd2{font-weight:700;font-size:2.25rem}",
-	map: "{\"version\":3,\"file\":\"settings.svelte\",\"sources\":[\"settings.svelte\"],\"sourcesContent\":[\"<script>\\n\\timport Theme from '../components/Theme.svelte';\\n</script>\\n\\n<style>h1 {\\n  font-weight: 700;\\n  font-size: 2.25rem;\\n}\\n\\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9yb3V0ZXMvc2V0dGluZ3Muc3ZlbHRlIiwiPG5vIHNvdXJjZT4iXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQ0M7RUNERCxpQkFBQTtFQUFBLG1CQUFBO0FER0MiLCJmaWxlIjoic3JjL3JvdXRlcy9zZXR0aW5ncy5zdmVsdGUiLCJzb3VyY2VzQ29udGVudCI6WyJcblx0aDEge1xuXHRcdEBhcHBseSBmb250LWJvbGQgdGV4dC00eGw7XG5cdH1cbiIsbnVsbF19 */</style>\\n\\n<svelte:head>\\n\\t<title>Settings</title>\\n</svelte:head>\\n\\n<h1>Settings</h1>\\n\\n<p>This is the 'settings' page. There's not much here.</p>\\n\\n<div class=\\\"flex flex-col md:flex-row\\\">\\n\\t<button class=\\\"btn btn-primary mt-4 md:mr-2\\\">\\n\\t\\tPrimary Button\\n\\t</button>\\n\\n\\t<button class=\\\"btn btn-secondary mt-2 md:mt-4\\\">\\n\\t\\tSecondary Button\\n\\t</button>\\n</div>\\n\\n\\n<Theme classes={\\\"mt-12 mx-auto md:mx-0 flex\\\"}/>\\n\\n\\n\"],\"names\":[],\"mappings\":\"AAIO,EAAE,eAAC,CAAC,AACT,WAAW,CAAE,GAAG,CAChB,SAAS,CAAE,OAAO,AACpB,CAAC\"}"
-};
-
-const Settings = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	$$result.css.add(css$1);
-
-	return `${($$result.head += `<title>Settings</title>`, "")}
-
-	<h1 class="svelte-1rnbhd2">Settings</h1>
-
-	<p>This is the 'settings' page. There's not much here.</p>
-
-	<div class="flex flex-col md:flex-row">
-		<button class="btn btn-primary mt-4 md:mr-2">
-			Primary Button
-		</button>
-
-		<button class="btn btn-secondary mt-2 md:mt-4">
-			Secondary Button
-		</button>
-	</div>
-
-
-	${validate_component(Theme, 'Theme').$$render($$result, { classes: "mt-12 mx-auto md:mx-0 flex" }, {}, {})}`;
-});
-
-/* src/routes/blog/index.svelte generated by Svelte v3.6.9 */
-
-const css$2 = {
-	code: "ul.svelte-1o52zm5{margin:0 0 1em 0;line-height:1.5}h1.svelte-1o52zm5{font-weight:700;font-size:2.25rem}",
-	map: "{\"version\":3,\"file\":\"index.svelte\",\"sources\":[\"index.svelte\"],\"sourcesContent\":[\"<script context=\\\"module\\\">\\n\\timport Theme from '../../components/Theme.svelte';\\n\\n\\texport function preload({ params, query }) {\\n\\t\\treturn this.fetch(`blog.json`).then(r => r.json()).then(posts => {\\n\\t\\t\\treturn { posts };\\n\\t\\t});\\n\\t}\\n</script>\\n\\n<script>\\n\\texport let posts;\\n</script>\\n\\n<style>ul {\\n  margin: 0 0 1em 0;\\n  line-height: 1.5;\\n}\\n\\nh1 {\\n  font-weight: 700;\\n  font-size: 2.25rem;\\n}\\n\\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9yb3V0ZXMvYmxvZy9pbmRleC5zdmVsdGUiLCI8bm8gc291cmNlPiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFDQztFQUNDLGlCQUFpQjtFQUNqQixnQkFBZ0I7QUFDakI7O0FBRUE7RUNORCxpQkFBQTtFQUFBLG1CQUFBO0FEUUMiLCJmaWxlIjoic3JjL3JvdXRlcy9ibG9nL2luZGV4LnN2ZWx0ZSIsInNvdXJjZXNDb250ZW50IjpbIlxuXHR1bCB7XG5cdFx0bWFyZ2luOiAwIDAgMWVtIDA7XG5cdFx0bGluZS1oZWlnaHQ6IDEuNTtcblx0fVxuXG5cdGgxIHtcblx0XHRAYXBwbHkgZm9udC1ib2xkIHRleHQtNHhsO1xuXHR9XG4iLG51bGxdfQ== */</style>\\n\\n<svelte:head>\\n\\t<title>Blog</title>\\n</svelte:head>\\n\\n<h1>Recent posts</h1>\\n\\n<ul>\\n\\t{#each posts as post}\\n\\t\\t<!-- we're using the non-standard `rel=prefetch` attribute to\\n\\t\\t\\t\\ttell Sapper to load the data for the page as soon as\\n\\t\\t\\t\\tthe user hovers over the link or taps it, instead of\\n\\t\\t\\t\\twaiting for the 'click' event -->\\n\\t\\t<li><a rel='prefetch' href='blog/{post.slug}'>{post.title}</a></li>\\n\\t{/each}\\n</ul>\\n\\n<Theme classes={\\\"flex mx-auto md:mx-0\\\"}/>\"],\"names\":[],\"mappings\":\"AAcO,EAAE,eAAC,CAAC,AACT,MAAM,CAAE,CAAC,CAAC,CAAC,CAAC,GAAG,CAAC,CAAC,CACjB,WAAW,CAAE,GAAG,AAClB,CAAC,AAED,EAAE,eAAC,CAAC,AACF,WAAW,CAAE,GAAG,CAChB,SAAS,CAAE,OAAO,AACpB,CAAC\"}"
-};
-
-function preload({ params, query }) {
-	return this.fetch(`blog.json`).then(r => r.json()).then(posts => {
-		return { posts };
-	});
-}
-
-const Index$1 = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let { posts } = $$props;
-
-	if ($$props.posts === void 0 && $$bindings.posts && posts !== void 0) $$bindings.posts(posts);
-
-	$$result.css.add(css$2);
-
-	return `${($$result.head += `<title>Blog</title>`, "")}
-
-	<h1 class="svelte-1o52zm5">Recent posts</h1>
-
-	<ul class="svelte-1o52zm5">
-		${each(posts, (post) => `
-			<li><a rel="prefetch" href="blog/${escape(post.slug)}">${escape(post.title)}</a></li>`)}
-	</ul>
-
-	${validate_component(Theme, 'Theme').$$render($$result, { classes: "flex mx-auto md:mx-0" }, {}, {})}`;
-});
-
-/* src/routes/blog/[slug].svelte generated by Svelte v3.6.9 */
-
-const css$3 = {
-	code: ".content.svelte-1snaucg h2{font-size:1.4em;font-weight:500}.content.svelte-1snaucg pre{background-color:#f9f9f9;box-shadow:inset 1px 1px 5px rgba(0,0,0,0.05);padding:0.5em;border-radius:2px;overflow-x:auto}.content.svelte-1snaucg pre code{background-color:transparent;padding:0}.content.svelte-1snaucg ul{line-height:1.5}.content.svelte-1snaucg li{margin:0 0 0.5em 0}",
-	map: "{\"version\":3,\"file\":\"[slug].svelte\",\"sources\":[\"[slug].svelte\"],\"sourcesContent\":[\"<script context=\\\"module\\\">\\n\\texport async function preload({ params, query }) {\\n\\t\\t// the `slug` parameter is available because\\n\\t\\t// this file is called [slug].svelte\\n\\t\\tconst res = await this.fetch(`blog/${params.slug}.json`);\\n\\t\\tconst data = await res.json();\\n\\n\\t\\tif (res.status === 200) {\\n\\t\\t\\treturn { post: data };\\n\\t\\t} else {\\n\\t\\t\\tthis.error(res.status, data.message);\\n\\t\\t}\\n\\t}\\n</script>\\n\\n<script>\\n\\texport let post;\\n</script>\\n\\n<style>/*\\n\\t\\tBy default, CSS is locally scoped to the component,\\n\\t\\tand any unused styles are dead-code-eliminated.\\n\\t\\tIn this page, Svelte can't know which elements are\\n\\t\\tgoing to appear inside the {{{post.html}}} block,\\n\\t\\tso we have to use the :global(...) modifier to target\\n\\t\\tall elements inside .content\\n\\t*/\\n\\n.content :global(h2) {\\n  font-size: 1.4em;\\n  font-weight: 500;\\n}\\n\\n.content :global(pre) {\\n  background-color: #f9f9f9;\\n  box-shadow: inset 1px 1px 5px rgba(0,0,0,0.05);\\n  padding: 0.5em;\\n  border-radius: 2px;\\n  overflow-x: auto;\\n}\\n\\n.content :global(pre) :global(code) {\\n  background-color: transparent;\\n  padding: 0;\\n}\\n\\n.content :global(ul) {\\n  line-height: 1.5;\\n}\\n\\n.content :global(li) {\\n  margin: 0 0 0.5em 0;\\n}\\n\\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9yb3V0ZXMvYmxvZy9bc2x1Z10uc3ZlbHRlIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUNDOzs7Ozs7O0VBT0M7O0FBQ0Q7RUFDQyxnQkFBZ0I7RUFDaEIsZ0JBQWdCO0FBQ2pCOztBQUVBO0VBQ0MseUJBQXlCO0VBQ3pCLDhDQUE4QztFQUM5QyxjQUFjO0VBQ2Qsa0JBQWtCO0VBQ2xCLGdCQUFnQjtBQUNqQjs7QUFFQTtFQUNDLDZCQUE2QjtFQUM3QixVQUFVO0FBQ1g7O0FBRUE7RUFDQyxnQkFBZ0I7QUFDakI7O0FBRUE7RUFDQyxtQkFBbUI7QUFDcEIiLCJmaWxlIjoic3JjL3JvdXRlcy9ibG9nL1tzbHVnXS5zdmVsdGUiLCJzb3VyY2VzQ29udGVudCI6WyJcblx0Lypcblx0XHRCeSBkZWZhdWx0LCBDU1MgaXMgbG9jYWxseSBzY29wZWQgdG8gdGhlIGNvbXBvbmVudCxcblx0XHRhbmQgYW55IHVudXNlZCBzdHlsZXMgYXJlIGRlYWQtY29kZS1lbGltaW5hdGVkLlxuXHRcdEluIHRoaXMgcGFnZSwgU3ZlbHRlIGNhbid0IGtub3cgd2hpY2ggZWxlbWVudHMgYXJlXG5cdFx0Z29pbmcgdG8gYXBwZWFyIGluc2lkZSB0aGUge3t7cG9zdC5odG1sfX19IGJsb2NrLFxuXHRcdHNvIHdlIGhhdmUgdG8gdXNlIHRoZSA6Z2xvYmFsKC4uLikgbW9kaWZpZXIgdG8gdGFyZ2V0XG5cdFx0YWxsIGVsZW1lbnRzIGluc2lkZSAuY29udGVudFxuXHQqL1xuXHQuY29udGVudCA6Z2xvYmFsKGgyKSB7XG5cdFx0Zm9udC1zaXplOiAxLjRlbTtcblx0XHRmb250LXdlaWdodDogNTAwO1xuXHR9XG5cblx0LmNvbnRlbnQgOmdsb2JhbChwcmUpIHtcblx0XHRiYWNrZ3JvdW5kLWNvbG9yOiAjZjlmOWY5O1xuXHRcdGJveC1zaGFkb3c6IGluc2V0IDFweCAxcHggNXB4IHJnYmEoMCwwLDAsMC4wNSk7XG5cdFx0cGFkZGluZzogMC41ZW07XG5cdFx0Ym9yZGVyLXJhZGl1czogMnB4O1xuXHRcdG92ZXJmbG93LXg6IGF1dG87XG5cdH1cblxuXHQuY29udGVudCA6Z2xvYmFsKHByZSkgOmdsb2JhbChjb2RlKSB7XG5cdFx0YmFja2dyb3VuZC1jb2xvcjogdHJhbnNwYXJlbnQ7XG5cdFx0cGFkZGluZzogMDtcblx0fVxuXG5cdC5jb250ZW50IDpnbG9iYWwodWwpIHtcblx0XHRsaW5lLWhlaWdodDogMS41O1xuXHR9XG5cblx0LmNvbnRlbnQgOmdsb2JhbChsaSkge1xuXHRcdG1hcmdpbjogMCAwIDAuNWVtIDA7XG5cdH1cbiJdfQ== */</style>\\n\\n<svelte:head>\\n\\t<title>{post.title}</title>\\n</svelte:head>\\n\\n<h1>{post.title}</h1>\\n\\n<div class='content'>\\n\\t{@html post.html}\\n</div>\\n\"],\"names\":[],\"mappings\":\"AA4BA,uBAAQ,CAAC,AAAQ,EAAE,AAAE,CAAC,AACpB,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,GAAG,AAClB,CAAC,AAED,uBAAQ,CAAC,AAAQ,GAAG,AAAE,CAAC,AACrB,gBAAgB,CAAE,OAAO,CACzB,UAAU,CAAE,KAAK,CAAC,GAAG,CAAC,GAAG,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,IAAI,CAAC,CAC9C,OAAO,CAAE,KAAK,CACd,aAAa,CAAE,GAAG,CAClB,UAAU,CAAE,IAAI,AAClB,CAAC,AAED,uBAAQ,CAAC,AAAQ,GAAG,AAAC,CAAC,AAAQ,IAAI,AAAE,CAAC,AACnC,gBAAgB,CAAE,WAAW,CAC7B,OAAO,CAAE,CAAC,AACZ,CAAC,AAED,uBAAQ,CAAC,AAAQ,EAAE,AAAE,CAAC,AACpB,WAAW,CAAE,GAAG,AAClB,CAAC,AAED,uBAAQ,CAAC,AAAQ,EAAE,AAAE,CAAC,AACpB,MAAM,CAAE,CAAC,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,AACrB,CAAC\"}"
-};
-
-async function preload$1({ params, query }) {
-	// the `slug` parameter is available because
-	// this file is called [slug].svelte
-	const res = await this.fetch(`blog/${params.slug}.json`);
-	const data = await res.json();
-
-	if (res.status === 200) {
-		return { post: data };
-	} else {
-		this.error(res.status, data.message);
-	}
-}
-
-const Slug = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let { post } = $$props;
-
-	if ($$props.post === void 0 && $$bindings.post && post !== void 0) $$bindings.post(post);
-
-	$$result.css.add(css$3);
-
-	return `${($$result.head += `<title>${escape(post.title)}</title>`, "")}
-
-	<h1>${escape(post.title)}</h1>
-
-	<div class="content svelte-1snaucg">
-		${post.html}
-	</div>`;
-});
-
-/* src/components/Nav.svelte generated by Svelte v3.6.9 */
-
-const css$4 = {
-	code: "a.svelte-10rwj5x{display:flex;height:100%;justify-content:center;margin-left:0.5rem;margin-right:0.5rem;align-items:center}svg.svelte-10rwj5x{fill:currentColor;display:inline-flex;height:1.5rem;width:1.5rem;margin-right:0.5rem}p.svelte-10rwj5x{display:none}@media(min-width: 768px){svg.svelte-10rwj5x{display:none}p.svelte-10rwj5x{display:block}li.svelte-10rwj5x{height:100%}}",
-	map: "{\"version\":3,\"file\":\"Nav.svelte\",\"sources\":[\"Nav.svelte\"],\"sourcesContent\":[\"<script>\\n\\texport let segment;\\n</script>\\n\\n<style>a {\\n  display: flex;\\n  height: 100%;\\n  justify-content: center;\\n  margin-left: 0.5rem;\\n  margin-right: 0.5rem;\\n  align-items: center;\\n}\\n\\nsvg {\\n  fill: currentColor;\\n  display: inline-flex;\\n  height: 1.5rem;\\n  width: 1.5rem;\\n  margin-right: 0.5rem;\\n}\\n\\np {\\n  display: none;\\n}\\n\\n@media (min-width: 768px) {\\n  .selected {\\n    color: var(--color-text-secondary);\\n    border-style: solid;\\n    border-bottom-width: 2px;\\n    border-color: #6b46c1;\\n    padding-top: 2px;\\n  }\\n\\n  svg {\\n    display: none;\\n  }\\n\\n  p {\\n    display: block;\\n  }\\n\\n  li {\\n    height: 100%;\\n  }\\n}\\n\\n\\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9jb21wb25lbnRzL05hdi5zdmVsdGUiLCI8bm8gc291cmNlPiJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFFQztFQ0ZELGNBQUE7RUFBQSxhQUFBO0VBQUEsd0JBQUE7RUFBQSxvQkFBQTtFQUFBLHFCQUFBO0VBQUEsb0JBQUE7QURJQzs7QUFFQTtFQ05ELG1CQUFBO0VBQUEscUJBQUE7RUFBQSxlQUFBO0VBQUEsY0FBQTtFQUFBLHFCQUFBO0FEUUM7O0FBRUE7RUNWRCxjQUFBO0FEWUM7O0FBRUE7RUFDQztJQ2ZGLG1DQUFBO0lBQUEsb0JBQUE7SUFBQSx5QkFBQTtJQUFBLHNCQUFBO0lEaUJHLGdCQUFnQjtFQUNqQjs7RUFFQTtJQ3BCRixjQUFBO0VEc0JFOztFQUVBO0lDeEJGLGVBQUE7RUQwQkU7O0VBRUE7SUM1QkYsYUFBQTtFRDhCRTtBQUVEIiwiZmlsZSI6InNyYy9jb21wb25lbnRzL05hdi5zdmVsdGUiLCJzb3VyY2VzQ29udGVudCI6WyJcblxuXHRhIHtcblx0XHRAYXBwbHkgZmxleCBoLWZ1bGwganVzdGlmeS1jZW50ZXIgbXgtMiBpdGVtcy1jZW50ZXI7XG5cdH1cblxuXHRzdmcge1xuXHRcdEBhcHBseSBmaWxsLWN1cnJlbnQgaW5saW5lLWZsZXggaC02IHctNiBtci0yO1xuXHR9XG5cblx0cCB7XG5cdFx0QGFwcGx5IGhpZGRlbjtcblx0fVxuXG5cdEBzY3JlZW4gbWQge1xuXHRcdC5zZWxlY3RlZCB7XG5cdFx0XHRAYXBwbHkgdGV4dC1zZWNvbmRhcnkgYm9yZGVyLXNvbGlkIGJvcmRlci1iLTIgYm9yZGVyLXB1cnBsZS03MDA7XG5cdFx0XHRwYWRkaW5nLXRvcDogMnB4O1xuXHRcdH1cblxuXHRcdHN2ZyB7XG5cdFx0XHRAYXBwbHkgaGlkZGVuO1xuXHRcdH1cblxuXHRcdHAge1xuXHRcdFx0QGFwcGx5IGJsb2NrO1xuXHRcdH1cblxuXHRcdGxpIHtcblx0XHRcdEBhcHBseSBoLWZ1bGw7XG5cdFx0fVxuXG5cdH1cblxuIixudWxsXX0= */</style>\\n\\n<nav class=\\\"bg-primary md:bg-secondary font-light text-default md:text-default h-16 w-full fixed md:mt-16 bottom-0 md:bottom-auto\\\">\\n\\t<ul class=\\\"flex flex-row items-center justify-around md:justify-start md:mx-8 h-full\\\">\\n\\t\\t<li>\\n\\t\\t\\t<a class='{segment === undefined ? \\\"text-primary\\\" : \\\"\\\"}' href='.'>\\n\\t\\t\\t\\t<svg>\\n\\t\\t\\t\\t\\t<use xlink:href=\\\"solid.svg#home\\\"></use>\\n\\t\\t\\t\\t</svg>\\n\\t\\t\\t\\t<p>home<p>\\n\\t\\t\\t</a>\\n\\t\\t</li>\\n\\t\\t<li>\\n\\t\\t\\t<a rel=prefetch class='{segment === \\\"blog\\\" ? \\\"text-primary\\\" : \\\"\\\"}' href='blog'>\\n\\t\\t\\t\\t<svg>\\n\\t\\t\\t\\t\\t<use xlink:href=\\\"solid.svg#calendar-check\\\"></use>\\n\\t\\t\\t\\t</svg>\\n\\t\\t\\t\\t<p>blog<p>\\n\\t\\t\\t</a>\\n\\t\\t</li>\\n\\t\\t<li>\\n\\t\\t\\t<a class='{segment === \\\"settings\\\" ? \\\"text-primary\\\" : \\\"\\\"}' href='settings'>\\n\\t\\t\\t\\t<svg>\\n\\t\\t\\t\\t\\t<use xlink:href=\\\"solid.svg#cog\\\"></use>\\n\\t\\t\\t\\t</svg>\\n\\t\\t\\t\\t<p>settings<p>\\n\\t\\t\\t</a>\\n\\t\\t</li>\\n\\t</ul>\\n</nav>\"],\"names\":[],\"mappings\":\"AAIO,CAAC,eAAC,CAAC,AACR,OAAO,CAAE,IAAI,CACb,MAAM,CAAE,IAAI,CACZ,eAAe,CAAE,MAAM,CACvB,WAAW,CAAE,MAAM,CACnB,YAAY,CAAE,MAAM,CACpB,WAAW,CAAE,MAAM,AACrB,CAAC,AAED,GAAG,eAAC,CAAC,AACH,IAAI,CAAE,YAAY,CAClB,OAAO,CAAE,WAAW,CACpB,MAAM,CAAE,MAAM,CACd,KAAK,CAAE,MAAM,CACb,YAAY,CAAE,MAAM,AACtB,CAAC,AAED,CAAC,eAAC,CAAC,AACD,OAAO,CAAE,IAAI,AACf,CAAC,AAED,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AASzB,GAAG,eAAC,CAAC,AACH,OAAO,CAAE,IAAI,AACf,CAAC,AAED,CAAC,eAAC,CAAC,AACD,OAAO,CAAE,KAAK,AAChB,CAAC,AAED,EAAE,eAAC,CAAC,AACF,MAAM,CAAE,IAAI,AACd,CAAC,AACH,CAAC\"}"
-};
-
-const Nav = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let { segment } = $$props;
-
-	if ($$props.segment === void 0 && $$bindings.segment && segment !== void 0) $$bindings.segment(segment);
-
-	$$result.css.add(css$4);
-
-	return `<nav class="bg-primary md:bg-secondary font-light text-default md:text-default h-16 w-full fixed md:mt-16 bottom-0 md:bottom-auto">
-		<ul class="flex flex-row items-center justify-around md:justify-start md:mx-8 h-full">
-			<li class="svelte-10rwj5x">
-				<a class="${escape(segment === undefined ? "text-primary" : "")} svelte-10rwj5x" href=".">
-					<svg class="svelte-10rwj5x">
-						<use xlink:href="solid.svg#home"></use>
-					</svg>
-					<p class="svelte-10rwj5x">home</p><p class="svelte-10rwj5x">
-				</p></a>
-			</li>
-			<li class="svelte-10rwj5x">
-				<a rel="prefetch" class="${escape(segment === "blog" ? "text-primary" : "")} svelte-10rwj5x" href="blog">
-					<svg class="svelte-10rwj5x">
-						<use xlink:href="solid.svg#calendar-check"></use>
-					</svg>
-					<p class="svelte-10rwj5x">blog</p><p class="svelte-10rwj5x">
-				</p></a>
-			</li>
-			<li class="svelte-10rwj5x">
-				<a class="${escape(segment === "settings" ? "text-primary" : "")} svelte-10rwj5x" href="settings">
-					<svg class="svelte-10rwj5x">
-						<use xlink:href="solid.svg#cog"></use>
-					</svg>
-					<p class="svelte-10rwj5x">settings</p><p class="svelte-10rwj5x">
-				</p></a>
-			</li>
-		</ul>
-	</nav>`;
-});
-
-/* src/routes/_layout.svelte generated by Svelte v3.6.9 */
-
-const Layout = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let $darkTheme = get_store_value(darkTheme);
-
-	
-
-	let { segment } = $$props;
-
-	if ($$props.segment === void 0 && $$bindings.segment && segment !== void 0) $$bindings.segment(segment);
-
-	return `<div class="${escape($darkTheme ? "theme-dark" : "theme-basic")} bg-default h-full min-h-screen">
-		<div class="fixed top-0 h-16 w-full flex flex-row items-center justify-around bg-primary text-primary font-extrabold text-3xl">
-			This is a title.
-		</div>
-
-		${validate_component(Nav, 'Nav').$$render($$result, { segment: segment }, {}, {})}
-
-		<main class="text-default pt-20 md:pt-40 px-8 pb-8 max-w-4xl mx-auto">
-			${$$slots.default ? $$slots.default() : ``}
-		</main>
-	</div>`;
-});
-
-/* src/routes/_error.svelte generated by Svelte v3.6.9 */
-
-const css$5 = {
-	code: "h1.svelte-iy9kc2,p.svelte-iy9kc2{margin:0 auto}h1.svelte-iy9kc2{font-size:2.8em;font-weight:700;margin:0 0 0.5em 0}p.svelte-iy9kc2{margin:1em auto}@media(min-width: 480px){h1.svelte-iy9kc2{font-size:4em}}",
-	map: "{\"version\":3,\"file\":\"_error.svelte\",\"sources\":[\"_error.svelte\"],\"sourcesContent\":[\"<script>\\n\\texport let status;\\n\\texport let error;\\n\\n\\tconst dev = undefined === 'development';\\n</script>\\n\\n<style>h1, p {\\n  margin: 0 auto;\\n}\\n\\nh1 {\\n  font-size: 2.8em;\\n  font-weight: 700;\\n  margin: 0 0 0.5em 0;\\n}\\n\\np {\\n  margin: 1em auto;\\n}\\n\\n@media (min-width: 480px) {\\n  h1 {\\n    font-size: 4em;\\n  }\\n}\\n\\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9yb3V0ZXMvX2Vycm9yLnN2ZWx0ZSJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFDQztFQUNDLGNBQWM7QUFDZjs7QUFFQTtFQUNDLGdCQUFnQjtFQUNoQixnQkFBZ0I7RUFDaEIsbUJBQW1CO0FBQ3BCOztBQUVBO0VBQ0MsZ0JBQWdCO0FBQ2pCOztBQUVBO0VBQ0M7SUFDQyxjQUFjO0VBQ2Y7QUFDRCIsImZpbGUiOiJzcmMvcm91dGVzL19lcnJvci5zdmVsdGUiLCJzb3VyY2VzQ29udGVudCI6WyJcblx0aDEsIHAge1xuXHRcdG1hcmdpbjogMCBhdXRvO1xuXHR9XG5cblx0aDEge1xuXHRcdGZvbnQtc2l6ZTogMi44ZW07XG5cdFx0Zm9udC13ZWlnaHQ6IDcwMDtcblx0XHRtYXJnaW46IDAgMCAwLjVlbSAwO1xuXHR9XG5cblx0cCB7XG5cdFx0bWFyZ2luOiAxZW0gYXV0bztcblx0fVxuXG5cdEBtZWRpYSAobWluLXdpZHRoOiA0ODBweCkge1xuXHRcdGgxIHtcblx0XHRcdGZvbnQtc2l6ZTogNGVtO1xuXHRcdH1cblx0fVxuIl19 */</style>\\n\\n<svelte:head>\\n\\t<title>{status}</title>\\n</svelte:head>\\n\\n<h1>{status}</h1>\\n\\n<p>{error.message}</p>\\n\\n{#if dev && error.stack}\\n\\t<pre>{error.stack}</pre>\\n{/if}\\n\"],\"names\":[],\"mappings\":\"AAOO,gBAAE,CAAE,CAAC,cAAC,CAAC,AACZ,MAAM,CAAE,CAAC,CAAC,IAAI,AAChB,CAAC,AAED,EAAE,cAAC,CAAC,AACF,SAAS,CAAE,KAAK,CAChB,WAAW,CAAE,GAAG,CAChB,MAAM,CAAE,CAAC,CAAC,CAAC,CAAC,KAAK,CAAC,CAAC,AACrB,CAAC,AAED,CAAC,cAAC,CAAC,AACD,MAAM,CAAE,GAAG,CAAC,IAAI,AAClB,CAAC,AAED,MAAM,AAAC,YAAY,KAAK,CAAC,AAAC,CAAC,AACzB,EAAE,cAAC,CAAC,AACF,SAAS,CAAE,GAAG,AAChB,CAAC,AACH,CAAC\"}"
-};
-
-const Error$1 = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	let { status, error } = $$props;
-
-	if ($$props.status === void 0 && $$bindings.status && status !== void 0) $$bindings.status(status);
-	if ($$props.error === void 0 && $$bindings.error && error !== void 0) $$bindings.error(error);
-
-	$$result.css.add(css$5);
-
-	return `${($$result.head += `<title>${escape(status)}</title>`, "")}
-
-	<h1 class="svelte-iy9kc2">${escape(status)}</h1>
-
-	<p class="svelte-iy9kc2">${escape(error.message)}</p>
-
-	${  `` }`;
-});
-
 // This file is generated by Sapper — do not edit it!
 
 const d = decodeURIComponent;
@@ -569,7 +190,15 @@ const manifest = {
 			// index.svelte
 			pattern: /^\/$/,
 			parts: [
-				{ name: "index", file: "index.svelte", component: Index }
+				{ name: "index", file: "index.svelte", component: index.default }
+			]
+		},
+
+		{
+			// dashboard/index.svelte
+			pattern: /^\/dashboard\/?$/,
+			parts: [
+				{ name: "dashboard", file: "dashboard/index.svelte", component: index$1.default }
 			]
 		},
 
@@ -577,7 +206,7 @@ const manifest = {
 			// settings.svelte
 			pattern: /^\/settings\/?$/,
 			parts: [
-				{ name: "settings", file: "settings.svelte", component: Settings }
+				{ name: "settings", file: "settings.svelte", component: settings.default }
 			]
 		},
 
@@ -585,7 +214,7 @@ const manifest = {
 			// blog/index.svelte
 			pattern: /^\/blog\/?$/,
 			parts: [
-				{ name: "blog", file: "blog/index.svelte", component: Index$1, preload: preload }
+				{ name: "blog", file: "blog/index.svelte", component: index$2.default, preload: index$2.preload }
 			]
 		},
 
@@ -594,45 +223,17 @@ const manifest = {
 			pattern: /^\/blog\/([^\/]+?)\/?$/,
 			parts: [
 				null,
-				{ name: "blog_$slug", file: "blog/[slug].svelte", component: Slug, preload: preload$1, params: match => ({ slug: d(match[1]) }) }
+				{ name: "blog_$slug", file: "blog/[slug].svelte", component: _slug_.default, preload: _slug_.preload, params: match => ({ slug: d(match[1]) }) }
 			]
 		}
 	],
 
-	root: Layout,
+	root: __chunk_2.root,
 	root_preload: () => {},
-	error: Error$1
+	error: __chunk_2.error
 };
 
 const build_dir = "__sapper__/build";
-
-const CONTEXT_KEY = {};
-
-/* src/node_modules/@sapper/internal/App.svelte generated by Svelte v3.6.9 */
-
-const App = create_ssr_component(($$result, $$props, $$bindings, $$slots) => {
-	
-
-	let { stores, error, status, segments, level0, level1 = null } = $$props;
-
-	setContext(CONTEXT_KEY, stores);
-
-	if ($$props.stores === void 0 && $$bindings.stores && stores !== void 0) $$bindings.stores(stores);
-	if ($$props.error === void 0 && $$bindings.error && error !== void 0) $$bindings.error(error);
-	if ($$props.status === void 0 && $$bindings.status && status !== void 0) $$bindings.status(status);
-	if ($$props.segments === void 0 && $$bindings.segments && segments !== void 0) $$bindings.segments(segments);
-	if ($$props.level0 === void 0 && $$bindings.level0 && level0 !== void 0) $$bindings.level0(level0);
-	if ($$props.level1 === void 0 && $$bindings.level1 && level1 !== void 0) $$bindings.level1(level1);
-
-	return `
-
-
-	${validate_component(Layout, 'Layout').$$render($$result, Object.assign({ segment: segments[0] }, level0.props), {}, {
-		default: () => `
-		${ error ? `${validate_component(Error$1, 'Error').$$render($$result, { error: error, status: status }, {}, {})}` : `${validate_component(((level1.component) || missing_component), 'svelte:component').$$render($$result, Object.assign(level1.props), {}, {})}` }
-	`
-	})}`;
-});
 
 function get_server_route_handler(routes) {
 	async function handle_route(route, req, res, next) {
@@ -914,7 +515,7 @@ var cookie = {
 var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$';
 var unsafeChars = /[<>\b\f\n\r\t\0\u2028\u2029]/g;
 var reserved = /^(?:do|if|in|for|int|let|new|try|var|byte|case|char|else|enum|goto|long|this|void|with|await|break|catch|class|const|final|float|short|super|throw|while|yield|delete|double|export|import|native|return|switch|throws|typeof|boolean|default|extends|finally|package|private|abstract|continue|debugger|function|volatile|interface|protected|transient|implements|instanceof|synchronized)$/;
-var escaped$1 = {
+var escaped = {
     '<': '\\u003C',
     '>': '\\u003E',
     '/': '\\u002F',
@@ -1095,7 +696,7 @@ function getType(thing) {
     return Object.prototype.toString.call(thing).slice(8, -1);
 }
 function escapeUnsafeChar(c) {
-    return escaped$1[c] || c;
+    return escaped[c] || c;
 }
 function escapeUnsafeChars(str) {
     return str.replace(unsafeChars, escapeUnsafeChar);
@@ -1114,8 +715,8 @@ function stringifyString(str) {
         if (char === '"') {
             result += '\\"';
         }
-        else if (char in escaped$1) {
-            result += escaped$1[char];
+        else if (char in escaped) {
+            result += escaped[char];
         }
         else if (code >= 0xd800 && code <= 0xdfff) {
             var next = str.charCodeAt(i + 1);
@@ -2965,7 +2566,7 @@ function get_page_handler(
 			const props = {
 				stores: {
 					page: {
-						subscribe: writable({
+						subscribe: __chunk_3.writable({
 							host: req.headers.host,
 							path: req.path,
 							query: req.query,
@@ -2973,9 +2574,9 @@ function get_page_handler(
 						}).subscribe
 					},
 					preloading: {
-						subscribe: writable(null).subscribe
+						subscribe: __chunk_3.writable(null).subscribe
 					},
-					session: writable(session)
+					session: __chunk_3.writable(session)
 				},
 				segments: layout_segments,
 				status: error ? status : 200,
@@ -3003,7 +2604,7 @@ function get_page_handler(
 				}
 			}
 
-			const { html, head, css } = App.render(props);
+			const { html, head, css } = __chunk_2.App.render(props);
 
 			const serialized = {
 				preloaded: `[${preloaded.map(data => try_serialize(data)).join(',')}]`,
@@ -3191,7 +2792,7 @@ function middleware(opts
 
 		get_server_route_handler(manifest.server_routes),
 
-		get_page_handler(manifest, session || noop$1)
+		get_page_handler(manifest, session || noop)
 	].filter(Boolean));
 }
 
@@ -3258,7 +2859,7 @@ function serve({ prefix, pathname, cache_control }
 	};
 }
 
-function noop$1(){}
+function noop(){}
 
 var server = /*#__PURE__*/Object.freeze({
 	middleware: middleware
@@ -3272,7 +2873,11 @@ if (dev) {
 		.use(
 			compression({ threshold: 0 }),
 			sirv('static', { dev }),
-			middleware()
+			middleware({
+				session: (req, res) => ({
+					user: null
+				})
+			})
 		)
 		.listen(PORT, err => {
 			if (err) console.log('error', err);
