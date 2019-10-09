@@ -13,7 +13,7 @@ if (dev) {
 			sirv('static', { dev }),
 			sapper.middleware({
 				session: (req, res) => ({
-					user: null
+					user: false
 				})
 			})
 		)

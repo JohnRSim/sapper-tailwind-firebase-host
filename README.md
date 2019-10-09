@@ -4,8 +4,7 @@ Boilerplate template for Sappert + Tailwind with some added Firebase hosting (se
 
 ```bash
 npm install # or yarn!
-npm run watch:tailwind # in a separate terminal window
-npm run dev # in a separate terminal window
+npm run watch:tailwind # in a separate terminal window # in a separate terminal window
 ```
 
 Open up [localhost:3000](http://localhost:3000) and start clicking around.

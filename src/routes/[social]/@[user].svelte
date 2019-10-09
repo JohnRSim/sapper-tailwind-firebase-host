@@ -1,3 +1,21 @@
+<script context="module">
+	// the (optional) preload function takes a
+	// `{ path, params, query }` object and turns it into
+	// the data we need to render the page
+	export async function preload(page, session) {
+		// the `slug` parameter is available because this file
+		// is called [slug].svelte\
+		console.log(page);
+		const { social, user } = page.params;
+		const supportedNetworks = ['twitter','google','facebook','github'];
+		//console.log('????',sSocial.supportedNetworks.indexOf(social));
+		if (supportedNetworks.indexOf(social.toLowerCase()) === -1) {
+			return this.redirect(302, '/');
+		}
+		return { user };
+	}
+</script>
+
 <script>
 //app
 import { goto, stores } from '@sapper/app';
@@ -11,7 +29,6 @@ const { session } = stores();
 
 //define vars
 let auth;
-let user;
 let logout;
 let home;
 
@@ -38,7 +55,7 @@ onMount(async () => {
 	};
 });
 
-
+export let user;
 
 </script>
 
@@ -47,6 +64,7 @@ onMount(async () => {
 </svelte:head>
 
 <Widget>
+Social @{user}
 	<button on:click="{() => {logout()}}">
 		Log out
 	</button>

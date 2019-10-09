@@ -47,6 +47,7 @@ onMount(async () => {
 </svelte:head>
 
 <Widget>
+USER
 	<button on:click="{() => {logout()}}">
 		Log out
 	</button>
